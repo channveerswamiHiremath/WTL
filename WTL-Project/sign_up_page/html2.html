@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #504c30 0%, #6e8bce 100%);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #504c30, #6e8bce);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .form-group {
+      position: relative;
+      margin: 20px 0;
+    }
+    form input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 16px;
+      color: #333;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+    form input:focus {
+      border-color: #667eea;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 10px 0;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #start-video-btn {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    #send-otp-btn {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+    }
+    #video-container {
+      display: none;
+      width: 100%;
+      margin-top: 20px;
+      text-align: center;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    #video {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+    #capture-btn {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      margin-top: 10px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    .footer a:hover {
+      color: #764ba2;
+    }
+    .voice-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(102, 126, 234, 0.9);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    .form-status {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .captured-indicator {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: none;
+      margin-top: 10px;
+    }
+    .otp-section {
+      display: none;
+      margin: 20px 0;
+    }
+    .otp-input {
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 8px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .success-message {
+      color: #11998e;
+      font-weight: 600;
+    }
+    .error-message {
+      color: #ff6b6b;
+      font-weight: 600;
+    }
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .timer {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-top: 5px;
+    }
+    .config-panel {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+    .config-panel h4 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .config-input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .config-toggle {
+      background: #667eea;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="voice-indicator" id="voice-indicator">🎤 Voice Assistant Active</div>
+  
+  <div class="container">
+    <h2>Create Account</h2>    
+    <form id="signup-form">
+      <div class="form-group">
+        <input type="text" id="username" placeholder="Enter your username" required>
+      </div>
+      
+      <div class="form-group">
+        <input type="email" id="email" placeholder="Enter your email address" required>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" id="password" placeholder="Create a password" required>
+      </div>
+      
+      <div class="form-status" id="form-status">Fill all fields and verify your email</div>
+      
+      <button type="button" id="send-otp-btn">Send OTP to Email</button>
+      
+      <div class="otp-section" id="otp-section">
+        <div class="form-group">
+          <input type="text" id="otp-input" class="otp-input" placeholder="000000" maxlength="6" required>
+        </div>
+        <div class="timer" id="otp-timer"></div>
+        <button type="button" id="verify-otp-btn">Verify OTP</button>
+      </div>
+      
+      <button type="button" id="start-video-btn">Capture Face</button>
+      
+      <div class="captured-indicator" id="captured-indicator">Face Captured Successfully</div>
+
+      <div id="video-container">
+        <video id="video" autoplay playsinline></video>
+        <button type="button" id="capture-btn">Take Photo</button>
+      </div>
+
+      <button type="submit" id="signup-btn" disabled>Create Account</button>
+    </form>
+
+    <div class="footer">
+      <p>Already have an account? <a href="login.html">Sign in here</a></p>
+    </div>
+  </div>
+
+  <!-- SMTP-based OTP Script Replacing EmailJS -->
+<!-- SMTP-based OTP Script Replacing EmailJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script>
+  // State variables
+  let capturedFaceImage = null;
+  let isEmailVerified = false;
+  let currentOtp = null;
+  let otpTimer = null;
+  let otpExpiryTime = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const formStatus = document.getElementById('form-status');
+    const sendOtpBtn = document.getElementById('send-otp-btn');
+    const verifyOtpBtn = document.getElementById('verify-otp-btn');
+    const otpSection = document.getElementById('otp-section');
+    const otpInput = document.getElementById('otp-input');
+    const signupBtn = document.getElementById('signup-btn');
+    const capturedIndicator = document.getElementById('captured-indicator');
+
+    const startVideoBtn = document.getElementById('start-video-btn');
+    const videoContainer = document.getElementById('video-container');
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('capture-btn');
+
+    if (typeof annyang !== 'undefined' && annyang) {
+      document.getElementById('voice-indicator').style.display = 'block';
+    }
+
+    function updateFormStatus(message, type = 'info') {
+      formStatus.textContent = message;
+      formStatus.className = `form-status ${type}-message`;
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    function startOtpTimer() {
+      const timerElement = document.getElementById('otp-timer');
+      otpExpiryTime = Date.now() + 10 * 60 * 1000;
+
+      otpTimer = setInterval(() => {
+        const timeLeft = otpExpiryTime - Date.now();
+        if (timeLeft <= 0) {
+          clearInterval(otpTimer);
+          currentOtp = null;
+          timerElement.textContent = 'OTP expired. Please request a new one.';
+          timerElement.style.color = '#ff6b6b';
+          verifyOtpBtn.disabled = true;
+        } else {
+          const min = Math.floor(timeLeft / 60000);
+          const sec = Math.floor((timeLeft % 60000) / 1000);
+          timerElement.textContent = `OTP expires in ${min}:${sec.toString().padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    async function sendOtpViaSMTP(username, email) {
+      try {
+        const response = await fetch('http://localhost:5000/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          currentOtp = result.otp;
+          updateFormStatus('OTP sent to your email!', 'success');
+          otpSection.style.display = 'block';
+          startOtpTimer();
+        } else {
+          updateFormStatus('SMTP error: ' + result.error, 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        updateFormStatus('Failed to send OTP. Server unreachable.', 'error');
+      }
+    }
+
+    sendOtpBtn.addEventListener('click', () => {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!username || !email) {
+        updateFormStatus('Enter username and email.', 'error');
+        return;
+      }
+      if (!isValidEmail(email)) {
+        updateFormStatus('Invalid email format.', 'error');
+        return;
+      }
+
+      sendOtpBtn.classList.add('loading');
+      sendOtpBtn.disabled = true;
+      updateFormStatus('Sending OTP...', 'info');
+      sendOtpViaSMTP(username, email).finally(() => {
+        sendOtpBtn.classList.remove('loading');
+        sendOtpBtn.disabled = false;
+      });
+    });
+
+    verifyOtpBtn.addEventListener('click', () => {
+      const entered = otpInput.value.trim();
+      if (!entered || entered.length !== 6) {
+        updateFormStatus('Enter valid 6-digit OTP.', 'error');
+        return;
+      }
+      if (!currentOtp || Date.now() > otpExpiryTime) {
+        updateFormStatus('OTP expired or not found.', 'error');
+        return;
+      }
+      if (entered === currentOtp) {
+        isEmailVerified = true;
+        updateFormStatus('Email verified!', 'success');
+        otpSection.style.display = 'none';
+        sendOtpBtn.style.display = 'none';
+        clearInterval(otpTimer);
+        updateSignupButton();
+      } else {
+        updateFormStatus('Incorrect OTP.', 'error');
+      }
+    });
+
+    otpInput.addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+
+    function updateSignupButton() {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const hasFace = capturedFaceImage !== null;
+
+      if (username && email && password && isEmailVerified && hasFace) {
+        signupBtn.disabled = false;
+        signupBtn.style.opacity = '1';
+        updateFormStatus('Ready to create account!', 'success');
+      } else {
+        signupBtn.disabled = true;
+        signupBtn.style.opacity = '0.6';
+      }
+    }
+
+    ['username', 'email', 'password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateSignupButton);
+    });
+
+    startVideoBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        videoContainer.style.display = 'block';
+        startVideoBtn.textContent = 'Camera Active';
+      } catch (error) {
+        updateFormStatus('Camera access denied.', 'error');
+      }
+    });
+
+    captureBtn.addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+
+      capturedFaceImage = canvas.toDataURL('image/jpeg');
+      capturedIndicator.style.display = 'block';
+
+      const stream = video.srcObject;
+      stream.getTracks().forEach(track => track.stop());
+      videoContainer.style.display = 'none';
+      startVideoBtn.textContent = 'Face Captured';
+      startVideoBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+      updateSignupButton();
+    });
+
+    /* ---------------------------  FORM SUBMISSION  -------------------------- */
+    const signupForm = document.getElementById('signup-form');
+    signupForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const userData = {
+        username,
+        email,
+        password: btoa(password), // replace with proper hash later
+        faceImage: capturedFaceImage,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.push(userData);
+        localStorage.setItem('users', JSON.stringify(users));
+        updateFormStatus('Account created! Redirecting...', 'success');
+        setTimeout(() => (window.location.href = 'index.html'), 1500);
+      } catch (err) {
+        console.error(err);
+        updateFormStatus('Error saving user. Try again.', 'error');
+      }
+    });
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+
+      capturedFaceImage = canvas.toDataURL('image/jpeg');
+      capturedIndicator.style.display = 'block';
+
+      const stream = video.srcObject;
+      stream.getTracks().forEach(track => track.stop());
+      videoContainer.style.display = 'none';
+      startVideoBtn.textContent = 'Face Captured';
+      startVideoBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+      updateSignupButton();
+    });
+</script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<!-- Annyang Voice Command -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+
+<script>
+  // EmailJS Config
+  emailjs.init('YOUR_PUBLIC_KEY'); // Replace with your EmailJS public key
+
+  // DOM References
+  const emailInput = document.getElementById('email');
+  const otpInput = document.getElementById('otp');
+  const formStatus = document.getElementById('form-status');
+  const nameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const facePreview = document.getElementById('facePreview');
+
+  let generatedOTP = '';
+
+  // 1️⃣ Send OTP via Email
+  function sendOTP() {
+    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const emailParams = {
+      to_email: emailInput.value,
+      otp: generatedOTP
+    };
+
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', emailParams)
+      .then(() => {
+        formStatus.textContent = 'OTP sent successfully!';
+        formStatus.style.color = 'green';
+      })
+      .catch(() => {
+        formStatus.textContent = 'Error sending OTP.';
+        formStatus.style.color = 'red';
+      });
+  }
+
+  function verifyOTP() {
+    if (otpInput.value === generatedOTP) {
+      formStatus.textContent = 'OTP verified!';
+      formStatus.style.color = 'green';
+      startFaceCapture();
+    } else {
+      formStatus.textContent = 'Invalid OTP.';
+      formStatus.style.color = 'red';
+    }
+  }
+
+  // 3️⃣ Face Capture
+  function startFaceCapture() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+
+        setTimeout(() => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 320;
+          canvas.height = 240;
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          facePreview.src = canvas.toDataURL('image/png');
+          stream.getTracks().forEach(track => track.stop());
+
+          formStatus.textContent = 'Face captured! Signup successful.';
+        }, 3000);
+      })
+      .catch(() => {
+        formStatus.textContent = 'Cannot access camera.';
+      });
+  }
+
+  // 4️⃣ Annyang Voice Commands
+  if (annyang) {
+    const commands = {
+      'my name is *name': name => nameInput.value = name,
+      'my email is *email': email => emailInput.value = email.replace(' at ', '@').replace(/\s/g, ''),
+      'my password is *pass': pass => passwordInput.value = pass,
+      'send otp': sendOTP,
+      'verify otp': verifyOTP,
+    };
+    annyang.addCommands(commands);
+    annyang.start();
+  }
+
+  // 5️⃣ Button Event Listeners (if used manually)
+  document.getElementById('sendOtpBtn')?.addEventListener('click', sendOTP);
+  document.getElementById('verifyOtpBtn')?.addEventListener('click', verifyOTP);
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayApp - Send Money</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #101d10;
+      color: white;
+    }
+    .app-bar {
+      background-color: #55BA53;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1c1c1c;
+    }
+    .app-bar h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      padding: 20px;
+    }
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ccc;
+    }
+    input, select {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid #1c1c1c;
+      background-color: #121d13;
+      color: white;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #55BA53;
+    }
+    .amount-input {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+    }
+    .btn {
+      background-color: #62d26f;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #4caf50;
+      transform: translateY(-2px);
+    }
+    .btn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    .profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .balance-info {
+      background-color: #1a2f1a;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      border: 1px solid #2d4a2d;
+    }
+    .balance-amount {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #62d26f;
+    }
+    .quick-amounts {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    .quick-amount-btn {
+      background-color: #2d4a2d;
+      border: 1px solid #55BA53;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    .quick-amount-btn:hover {
+      background-color: #55BA53;
+    }
+    .error-message {
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .success-message {
+      color: #4caf50;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .spinner {
+      border: 3px solid #2d4a2d;
+      border-top: 3px solid #55BA53;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .recent-recipients {
+      margin-top: 20px;
+      width: 100%;
+    }
+    .recent-recipients h3 {
+      color: #ccc;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .recipient-list {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+    .recipient-item {
+      min-width: 80px;
+      text-align: center;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #1a2f1a;
+      border: 1px solid #2d4a2d;
+      transition: all 0.3s ease;
+    }
+    .recipient-item:hover {
+      background-color: #2d4a2d;
+      border-color: #55BA53;
+    }
+    .recipient-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #55BA53;
+      margin: 0 auto 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .recipient-name {
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <h1>Send Money</h1>
+    <div class="profile">
+      <img src="https://i.pravatar.cc/100" alt="User Profile" />
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="balance-info">
+      <div style="font-size: 14px; color: #ccc; margin-bottom: 5px;">Available Balance</div>
+      <div class="balance-amount" id="current-balance">$0.00</div>
+    </div>
+
+    <div class="form">
+      <div class="form-group">
+        <label>Recipient</label>
+        <select id="recipient-type" onchange="toggleRecipientInput()">
+          <option value="phone">Phone Number</option>
+          <option value="email">Email Address</option>
+          <option value="username">Username</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label id="recipient-label">Recipient's Phone Number</label>
+        <input type="text" id="recipient" placeholder="Enter phone number" required />
+        <div class="error-message" id="recipient-error">Please enter a valid recipient</div>
+      </div>
+
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="number" id="amount" class="amount-input" placeholder="0.00" step="0.01" min="0.01" required />
+        <div class="quick-amounts">
+          <button type="button" class="quick-amount-btn" onclick="setQuickAmount(10)">$10</button>
+          <button type="button" class="quick-amount-btn" onclick="setQuickAmount(25)">$25</button>
+          <button type="button" class="quick-amount-btn" onclick="setQuickAmount(50)">$50</button>
+          <button type="button" class="quick-amount-btn" onclick="setQuickAmount(100)">$100</button>
+        </div>
+        <div class="error-message" id="amount-error">Insufficient balance or invalid amount</div>
+      </div>
+
+      <div class="form-group">
+        <label>Note (Optional)</label>
+        <input type="text" id="note" placeholder="What's this for?" maxlength="100" />
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Processing transaction...</div>
+      </div>
+
+      <button class="btn" id="send-btn" onclick="sendMoney()">Send Money</button>
+      <div class="success-message" id="success-message">Transaction completed successfully!</div>
+    </div>
+
+    <div class="recent-recipients">
+      <h3>Recent Recipients</h3>
+      <div class="recipient-list" id="recipient-list">
+        <!-- Recent recipients will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load user data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserBalance();
+      loadRecentRecipients();
+    });
+
+    // Load current user's balance
+    function loadUserBalance() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      
+      if (!currentUser) {
+        alert('Please log in first');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Set default balance if not exists
+      if (currentUser.balance === undefined) {
+        currentUser.balance = 0;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+
+      document.getElementById('current-balance').textContent = `$${currentUser.balance.toFixed(2)}`;
+    }
+
+    // Toggle recipient input based on type
+    function toggleRecipientInput() {
+      const type = document.getElementById('recipient-type').value;
+      const label = document.getElementById('recipient-label');
+      const input = document.getElementById('recipient');
+      
+      switch(type) {
+        case 'phone':
+          label.textContent = "Recipient's Phone Number";
+          input.placeholder = "Enter phone number";
+          input.type = "tel";
+          break;
+        case 'email':
+          label.textContent = "Recipient's Email Address";
+          input.placeholder = "Enter email address";
+          input.type = "email";
+          break;
+        case 'username':
+          label.textContent = "Recipient's Username";
+          input.placeholder = "Enter username";
+          input.type = "text";
+          break;
+      }
+    }
+
+    // Set quick amount
+    function setQuickAmount(amount) {
+      document.getElementById('amount').value = amount;
+    }
+
+    // Validate recipient input
+    function validateRecipient(recipient, type) {
+      if (!recipient.trim()) return false;
+      
+      switch(type) {
+        case 'phone':
+          return /^[\+]?[1-9][\d]{0,15}$/.test(recipient.replace(/\s+/g, ''));
+        case 'email':
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
+        case 'username':
+          return recipient.length >= 3;
+        default:
+          return false;
+      }
+    }
+
+    // Hide all error messages
+    function hideErrorMessages() {
+      document.querySelectorAll('.error-message').forEach(msg => {
+        msg.style.display = 'none';
+      });
+    }
+
+    // Show error message
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      if (message) {
+        errorElement.textContent = message;
+      }
+      errorElement.style.display = 'block';
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      const successElement = document.getElementById('success-message');
+      successElement.textContent = message;
+      successElement.style.display = 'block';
+      
+      setTimeout(() => {
+        successElement.style.display = 'none';
+      }, 5000);
+    }
+
+    // Main send money function
+    function sendMoney() {
+      hideErrorMessages();
+      
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!currentUser) {
+        alert('Please log in first');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Get form values
+      const recipientType = document.getElementById('recipient-type').value;
+      const recipient = document.getElementById('recipient').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const note = document.getElementById('note').value.trim();
+
+      // Validate recipient
+      if (!validateRecipient(recipient, recipientType)) {
+        showError('recipient-error', 'Please enter a valid recipient');
+        return;
+      }
+
+      // Validate amount
+      if (!amount || amount <= 0) {
+        showError('amount-error', 'Please enter a valid amount');
+        return;
+      }
+
+      if (amount > currentUser.balance) {
+        showError('amount-error', 'Insufficient balance');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('send-btn').disabled = true;
+
+      // Simulate transaction processing
+      setTimeout(() => {
+        try {
+          // Process the transaction
+          processTransaction(currentUser, recipient, amount, note, recipientType);
+          
+          // Hide loading
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('send-btn').disabled = false;
+          
+          // Show success message
+          showSuccess(`Successfully sent $${amount.toFixed(2)} to ${recipient}`);
+          
+          // Clear form
+          document.getElementById('recipient').value = '';
+          document.getElementById('amount').value = '';
+          document.getElementById('note').value = '';
+          
+          // Update balance display
+          loadUserBalance();
+          
+          // Add to recent recipients
+          addToRecentRecipients(recipient, recipientType);
+          
+        } catch (error) {
+          console.error('Transaction failed:', error);
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('send-btn').disabled = false;
+          showError('amount-error', 'Transaction failed. Please try again.');
+        }
+      }, 2000); // Simulate 2 second processing time
+    }
+
+    // Process the actual transaction
+    function processTransaction(currentUser, recipient, amount, note, recipientType) {
+      // Update user balance
+      currentUser.balance -= amount;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      // Update users array
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const userIndex = users.findIndex(u => u.email === currentUser.email);
+      if (userIndex !== -1) {
+        users[userIndex].balance = currentUser.balance;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      
+      // Create transaction record
+      const transactions = JSON.parse(localStorage.getItem(`transactions_${currentUser.email}`)) || [];
+      
+      const newTransaction = {
+        id: Date.now().toString(),
+        type: 'sent',
+        amount: amount,
+        description: note || `Money sent to ${recipient}`,
+        category: 'Transfer',
+        date: new Date().toISOString(),
+        recipient: recipient,
+        recipientType: recipientType
+      };
+      
+      transactions.push(newTransaction);
+      localStorage.setItem(`transactions_${currentUser.email}`, JSON.stringify(transactions));
+      
+      // Trigger storage event for other pages
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: `transactions_${currentUser.email}`,
+        newValue: JSON.stringify(transactions)
+      }));
+    }
+
+    // Add to recent recipients
+    function addToRecentRecipients(recipient, type) {
+      const recentRecipients = JSON.parse(localStorage.getItem('recentRecipients')) || [];
+      
+      // Check if recipient already exists
+      const existingIndex = recentRecipients.findIndex(r => r.recipient === recipient && r.type === type);
+      
+      if (existingIndex !== -1) {
+        // Move to front
+        recentRecipients.splice(existingIndex, 1);
+      }
+      
+      // Add to front
+      recentRecipients.unshift({
+        recipient: recipient,
+        type: type,
+        lastUsed: new Date().toISOString()
+      });
+      
+      // Keep only last 5 recipients
+      if (recentRecipients.length > 5) {
+        recentRecipients.splice(5);
+      }
+      
+      localStorage.setItem('recentRecipients', JSON.stringify(recentRecipients));
+      loadRecentRecipients();
+    }
+
+    // Load recent recipients
+    function loadRecentRecipients() {
+      const recentRecipients = JSON.parse(localStorage.getItem('recentRecipients')) || [];
+      const container = document.getElementById('recipient-list');
+      
+      container.innerHTML = '';
+      
+      recentRecipients.forEach(recipient => {
+        const recipientDiv = document.createElement('div');
+        recipientDiv.className = 'recipient-item';
+        recipientDiv.onclick = () => selectRecipient(recipient);
+        
+        const initial = recipient.recipient.charAt(0).toUpperCase();
+        
+        recipientDiv.innerHTML = `
+          <div class="recipient-avatar">${initial}</div>
+          <div class="recipient-name">${recipient.recipient}</div>
+        `;
+        
+        container.appendChild(recipientDiv);
+      });
+    }
+
+    // Select recipient from recent list
+    function selectRecipient(recipient) {
+      document.getElementById('recipient-type').value = recipient.type;
+      document.getElementById('recipient').value = recipient.recipient;
+      toggleRecipientInput();
+    }
+
+    // Go back function
+    function goBack() {
+      window.history.back();
+    }
+
+    // Add some sample recent recipients for demo
+    if (!localStorage.getItem('recentRecipients')) {
+      const sampleRecipients = [
+        { recipient: 'john@email.com', type: 'email', lastUsed: new Date().toISOString() },
+        { recipient: '+1234567890', type: 'phone', lastUsed: new Date().toISOString() },
+        { recipient: 'alice_doe', type: 'username', lastUsed: new Date().toISOString() }
+      ];
+      localStorage.setItem('recentRecipients', JSON.stringify(sampleRecipients));
+    }
+  </script>
+</body>
+</html>
