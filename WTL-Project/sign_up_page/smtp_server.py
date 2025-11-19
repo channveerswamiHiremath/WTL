@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 CORS(app)  
 
-SMTP_EMAIL = 'channveerhiremath735@gmail.com'
-SMTP_PASSWORD = 'cbtz htjp wkim cilo'
+SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
 def generate_otp():
     return str(random.randint(100000, 999999))
@@ -157,3 +157,4 @@ def send_otp():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+
