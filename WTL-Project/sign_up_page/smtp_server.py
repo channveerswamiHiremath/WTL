@@ -1,56 +1,44 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import requests
+import smtplib
+from email.message import EmailMessage
 import random
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SERVER = os.getenv("BREVO_SMTP_SERVER")
+BREVO_PORT = int(os.getenv("BREVO_SMTP_PORT"))
+BREVO_USER = os.getenv("BREVO_SMTP_USERNAME")
+BREVO_PASS = os.getenv("BREVO_SMTP_PASSWORD")
 
 def generate_otp():
     return str(random.randint(100000, 999999))
 
 @app.route('/send-otp', methods=['POST'])
 def send_otp():
+    data = request.get_json()
+    email = data['email']
+    username = data['username']
+    otp = generate_otp()
+
+    msg = EmailMessage()
+    msg['Subject'] = 'Your OTP'
+    msg['From'] = BREVO_USER
+    msg['To'] = email
+    msg.set_content(f"Your OTP is {otp}")
+
     try:
-        data = request.get_json()
-        email = data.get('email')
-        username = data.get('username')
+        with smtplib.SMTP(BREVO_SERVER, BREVO_PORT) as server:
+            server.starttls()
+            server.login(BREVO_USER, BREVO_PASS)
+            server.send_message(msg)
 
-        otp = generate_otp()
-
-        url = "https://api.brevo.com/v3/smtp/email"
-
-        payload = {
-            "sender": {"name": "NEO LEDGER X", "email": "noreply@neo-ledgerx.com"},
-            "to": [{"email": email}],
-            "subject": "Your OTP Code",
-            "htmlContent": f"""
-                <h2>Hello {username}</h2>
-                <p>Your OTP is:</p>
-                <h1>{otp}</h1>
-                <p>Do not share this with anyone.</p>
-            """
-        }
-
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "api-key": BREVO_API_KEY
-        }
-
-        brevo_res = requests.post(url, json=payload, headers=headers)
-
-        if brevo_res.status_code == 201:
-            return jsonify({"success": True, "otp": otp})
-        else:
-            return jsonify({"success": False, "error": brevo_res.text}), 500
+        return jsonify({"success": True, "otp": otp})
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)})
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run()
